@@ -115,8 +115,9 @@ perguntar_any() {
     read -p "Você deseja realizar a instalação do Any desk? (s/n): " resposta
     if [ "$resposta" = "s" ]; then
         echo "Ação realizada!"
-              wget https://download.anydesk.com/linux/anydesk_6.1.1-1_amd64.deb -O anydesk.deb
-               sudo dpkg -i anydesk.deb
+              wget http://download.anydesk.com/linux/anydesk_6.3.2-1_amd64.deb -O anydesk.deb
+			  
+			    sudo dpkg -i anydesk.deb
                 sudo apt-get install -f
              
     else
@@ -125,7 +126,7 @@ perguntar_any() {
     fi
 }
 
-#perguntar_any
+perguntar_any
 
 perguntar_putty() {
     read -p "Você deseja realizar a instalação do Putty e o screen? (s/n): " resposta
