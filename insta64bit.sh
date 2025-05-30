@@ -227,6 +227,7 @@ EOL
         echo "Instalação do NumLockX ignorada."
     fi
 }
+perguntar_numlockx
 
 
 
