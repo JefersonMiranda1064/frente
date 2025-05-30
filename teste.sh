@@ -8,29 +8,29 @@ obter_numero_cliente() {
         return 1
     fi
 
-    # Define base do script (diretório onde ele está sendo executado)
-    BASE_DIR="$(pwd)"
-    FRENTE_DIR="${BASE_DIR}/frente"
+    # Caminho fixo da pasta frente
+    FRENTE_DIR="/home/rpdv/frente"
 
-    # Cria diretório "frente" se não existir
+    # Garante que a pasta frente existe
     mkdir -p "$FRENTE_DIR"
 
-    # Baixa os arquivos do FTP
+    # Faz o download dos arquivos do FTP
     wget -p -m ftp://ftp.rpinfo.com.br/suporte/clientes/"$numero_cliente"/ \
         --ftp-user=jeferson.miranda --ftp-password=rp2019@@
 
-    # Move os arquivos baixados para o diretório "frente"
-    mv "${BASE_DIR}/ftp.rpinfo.com.br/suporte/clientes/${numero_cliente}/" "$FRENTE_DIR/"
+    # Move os arquivos baixados para a pasta frente
+    mv "./ftp.rpinfo.com.br/suporte/clientes/${numero_cliente}/" "$FRENTE_DIR/"
 
     # Copia os arquivos principais
     cp "$FRENTE_DIR/$numero_cliente"/* "$FRENTE_DIR/"
-    cp "$FRENTE_DIR/$numero_cliente"/clisitef/* "$FRENTE_DIR/"
-    cp "$FRENTE_DIR/$numero_cliente"/clisitef/* "$FRENTE_DIR/so/"
+    cp "$FRENTE_DIR/$numero_cliente/clisitef/"* "$FRENTE_DIR/"
+    cp "$FRENTE_DIR/$numero_cliente/clisitef/"* "$FRENTE_DIR/so/"
 
-    # Limpa arquivos temporários
-    rm -rf "${BASE_DIR}/ftp.rpinfo.com.br"
+    # Limpa os arquivos temporários
+    rm -rf "./ftp.rpinfo.com.br"
     rm -rf "$FRENTE_DIR/$numero_cliente/"
 }
+obter_numero_cliente
 
 
 #wget -p -m ftp://ftp.rpinfo.com.br/suporte/jeferson/wp/ --ftp-user=jeferson.miranda --ftp-password=rp2019@@
