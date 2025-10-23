@@ -1,0 +1,110 @@
+#!/bin/bash
+# ==========================================================
+# Script de Instalação Automatizada - Frente de Caixa RPDV
+# ==========================================================
+
+# Verifica se o usuário é root
+if [ "$EUID" -ne 0 ]; then
+  echo "❌ Por favor, execute este script como root."
+  exit 1
+fi
+
+# Diretórios
+TMP_DIR="/tmp/install_frente"
+BASE_DIR="/home/install"
+ORIG_DIR="$BASE_DIR/rpdv"
+DEST_DIR="/home/rpdv"
+TARGET_HOME="/home"
+TARGET_HOME2="/home/frente"
+
+# Função: Verifica comunicação com a internet
+verificar_comunicacao() {
+    echo "🔎 Verificando comunicação com a internet..."
+    if ping -q -c 1 8.8.8.8 &>/dev/null; then
+        echo "✅ Comunicação com a internet: OK"
+    else
+        echo "❌ Sem comunicação com a internet. Verifique a conexão de rede."
+        sleep 5
+        exit 1
+    fi
+}
+
+# 1️⃣ Verifica conexão
+verificar_comunicacao
+
+# 2️⃣ Atualiza pacotes
+echo "🔄 Atualizando pacotes do sistema..."
+apt-get update -y
+apt-get upgrade -y
+apt-get -f install -y
+apt-get install -y git unzip wget
+
+# 3️⃣ Prepara diretório temporário
+echo "📁 Preparando diretório temporário..."
+rm -rf "$TMP_DIR"
+mkdir -p "$TMP_DIR"
+cd "$TMP_DIR" || exit 1
+
+# 4️⃣ Faz o download no formato original do link FTP
+echo "⬇️ Baixando install.zip do FTP (formato original)..."
+wget -p -m ftp://ftp.rpinfo.com.br/suporte/jeferson/frentee/install.zip/ \
+  --ftp-user=jeferson.miranda \
+  --ftp-password=rp2019@@
+
+# 5️⃣ Localiza o arquivo install.zip baixado
+ZIP_FILE=$(find "$TMP_DIR" -type f -name "install.zip" | head -n 1)
+if [ ! -f "$ZIP_FILE" ]; then
+    echo "❌ Erro: arquivo install.zip não encontrado após o download."
+    exit 1
+fi
+echo "✅ Download concluído: $ZIP_FILE"
+
+# 6️⃣ Extrai o conteúdo para /home
+echo "📦 Extraindo conteúdo de install.zip para /home..."
+unzip -o "$ZIP_FILE" -d "$TARGET_HOME" > /dev/null 2>&1
+
+if [ ! -d "$BASE_DIR" ]; then
+    echo "❌ Erro: diretório /home/install não encontrado após extração."
+    exit 1
+fi
+echo "✅ Extração concluída."
+
+# 7️⃣ Move /home/install/rpdv → /home/rpdv
+if [ -d "$ORIG_DIR" ]; then
+    echo "📂 Movendo arquivos de $ORIG_DIR para $DEST_DIR..."
+    mkdir -p "$DEST_DIR"
+    mv "$ORIG_DIR"/* "$DEST_DIR"/ 2>/dev/null || echo "⚠️ Nenhum arquivo para mover de $ORIG_DIR."
+    rm -rf "$ORIG_DIR"
+else
+    echo "⚠️ Diretório $ORIG_DIR não encontrado, ignorando etapa de cópia."
+fi
+
+# 8️⃣ Move demais arquivos da instalação
+echo "📂 Movendo arquivos restantes de $BASE_DIR para $TARGET_HOME..."
+shopt -s dotglob nullglob
+mv "$BASE_DIR"/* "$TARGET_HOME"/ 2>/dev/null || echo "⚠️ Nenhum arquivo restante em $BASE_DIR."
+shopt -u dotglob nullglob
+
+# 9️⃣ Ajusta permissões em /home
+echo "🔐 Ajustando permissões em /home..."
+chmod -R 777 "$TARGET_HOME"/*
+
+# 🔟 Clona e executa o script do repositório Git
+echo "📥 Clonando repositório do frente..."
+rm -rf "$TARGET_HOME2"
+git clone https://github.com/JefersonMiranda1064/frente/ "$TARGET_HOME2"
+
+if [ -f "$TARGET_HOME2/insta64bit.sh" ]; then
+    echo "🚀 Executando script de pré-instalação do frente..."
+    chmod +x "$TARGET_HOME2/insta64bit.sh"
+    bash "$TARGET_HOME2/insta64bit.sh"
+else
+    echo "❌ Erro: arquivo insta64bit.sh não encontrado em $TARGET_HOME2."
+    exit 1
+fi
+
+# 🧹 Limpeza final
+echo "🧹 Limpando diretório temporário..."
+rm -rf "$TMP_DIR"
+
+echo "✅ Instalação concluída com sucesso!"
