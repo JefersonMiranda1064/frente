@@ -47,7 +47,7 @@ cd "$TMP_DIR" || exit 1
 
 # 4️⃣ Faz o download no formato original do link FTP
 echo "⬇️ Baixando install.zip do FTP (formato original)..."
-wget -p -m ftp://ftp.rpinfo.com.br/suporte/jeferson/frentee/install.zip/ \
+wget -p -m ftp://ftp.rpinfo.com.br/suporte/jeferson/frentee/bx/ \
   --ftp-user=jeferson.miranda \
   --ftp-password=rp2019@@
 
